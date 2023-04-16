@@ -9,12 +9,15 @@ class Main {
     public startContext(this: Main, event: MouseEvent): void {
         console.log("event", event);
         this.audioCtx = new AudioContext();
-        console.log("ctx", this.audioCtx);
 
         const content: HTMLParagraphElement[] = [];
 
         let p = document.createElement("p");
         p.textContent = "base latency: " + this.audioCtx.baseLatency.toString();
+        content.push(p);
+
+        p = document.createElement("p");
+        p.textContent = "current time: " + this.audioCtx.currentTime.toString();
         content.push(p);
 
         p = document.createElement("p");
@@ -32,7 +35,6 @@ class Main {
         content.forEach((el) => {
             this.ctxInfoEl.appendChild(el);
         });
-        console.log("ctx", this.ctxInfoEl.textContent);
     }
     public init(): void {
         console.log("my ctx", this.audioCtx);
@@ -45,6 +47,8 @@ class Main {
 
         this.ctxInfoEl = document.createElement("div");
         this.ctxInfoEl.textContent = "waiting to start audio context";
+
+        btn.click();
 
         this.rootEl.appendChild(btn);
         this.rootEl.appendChild(this.ctxInfoEl);
