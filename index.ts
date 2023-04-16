@@ -1,33 +1,55 @@
+/**
+     @see https://stackoverflow.com/questions/27846392/access-microphone-from-a-browser-javascript 
+     audio worklet 
+     @see https://developer.mozilla.org/en-US/docs/Web/API/AudioWorklet
+     */
+
+// TODO:
+// start_microphone
+// process_microphone_buffer
+// show_some_data
+
 class Main {
-    public rootEl: HTMLDivElement;
-    public audioCtx: AudioContext = null as any;
-    public ctxInfoEl: HTMLDivElement = null as any;
-    public streamSource: MediaStreamAudioSourceNode = null as any;
+    private rootEl: HTMLDivElement;
+    private audioCtx: AudioContext = null as any;
+    private ctxInfoEl: HTMLDivElement = null as any;
+
     public constructor() {
         this.rootEl = document.querySelector("#root") as HTMLDivElement;
         this.init();
     }
 
-    public getUserMedia(): void {
+    private gotStream(stream: MediaStream) {
+        console.log("got stream success", stream);
+
+        const ctx = new AudioContext();
+
+        // Create an AudioNode from the stream.
+        const streamNode = ctx.createMediaStreamSource(stream);
+
+        const mediaStreamSource = ctx.createMediaStreamSource(
+            streamNode.mediaStream
+        );
+
+        // Connect it to the destination to hear yourself (or any other node for processing!)
+        mediaStreamSource.connect(ctx.destination);
+
+        console.log("source node after connect", mediaStreamSource);
+    }
+
+    private getUserMedia(): void {
         window.navigator.getUserMedia(
             {
                 audio: true,
             },
-            (stream) => {
-                console.log("success", stream);
-                this.streamSource = {
-                    ...this.streamSource,
-                    mediaStream: stream,
-                };
-                console.log("stream source", this.streamSource);
-            },
+            this.gotStream,
             (err) => {
-                console.log("error", err);
+                console.log("get user media error", err);
             }
         );
     }
 
-    public startContext(this: Main, event: MouseEvent): void {
+    private startContext(this: Main, event: MouseEvent): void {
         console.log("event", event);
         this.audioCtx = new AudioContext();
 
@@ -58,7 +80,7 @@ class Main {
         });
         this.getUserMedia();
     }
-    public init(): void {
+    private init(): void {
         console.log("my ctx", this.audioCtx);
 
         const btn = document.createElement("button");
