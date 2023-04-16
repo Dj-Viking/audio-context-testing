@@ -1,0 +1,24 @@
+{
+    "name": "audio-context-testing",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "tsc; sh open.sh; tsc -w"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Dj-Viking/audio-context-testing.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Dj-Viking/audio-context-testing/issues"
+    },
+    "homepage": "https://github.com/Dj-Viking/audio-context-testing#readme",
+    "dependencies": {
+        "@types/node": "^18.15.11",
+        "typescript": "^5.0.4"
+    }
+}
