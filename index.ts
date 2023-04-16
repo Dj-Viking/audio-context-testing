@@ -2,10 +2,31 @@ class Main {
     public rootEl: HTMLDivElement;
     public audioCtx: AudioContext = null as any;
     public ctxInfoEl: HTMLDivElement = null as any;
+    public streamSource: MediaStreamAudioSourceNode = null as any;
     public constructor() {
         this.rootEl = document.querySelector("#root") as HTMLDivElement;
         this.init();
     }
+
+    public getUserMedia(): void {
+        window.navigator.getUserMedia(
+            {
+                audio: true,
+            },
+            (stream) => {
+                console.log("success", stream);
+                this.streamSource = {
+                    ...this.streamSource,
+                    mediaStream: stream,
+                };
+                console.log("stream source", this.streamSource);
+            },
+            (err) => {
+                console.log("error", err);
+            }
+        );
+    }
+
     public startContext(this: Main, event: MouseEvent): void {
         console.log("event", event);
         this.audioCtx = new AudioContext();
@@ -35,6 +56,7 @@ class Main {
         content.forEach((el) => {
             this.ctxInfoEl.appendChild(el);
         });
+        this.getUserMedia();
     }
     public init(): void {
         console.log("my ctx", this.audioCtx);
