@@ -1,7 +1,11 @@
 /**
-     @see https://stackoverflow.com/questions/27846392/access-microphone-from-a-browser-javascript 
-     audio worklet 
-     @see https://developer.mozilla.org/en-US/docs/Web/API/AudioWorklet
+        @see https://stackoverflow.com/questions/27846392/access-microphone-from-a-browser-javascript 
+        
+        audio worklet 
+        @see https://developer.mozilla.org/en-US/docs/Web/API/AudioWorklet
+
+        official web audio API docs
+        @see https://webaudio.github.io/web-audio-api
      */
 
 // TODO:
@@ -12,6 +16,7 @@
 class Main {
     private rootEl: HTMLDivElement;
     private audioCtx: AudioContext = null as any;
+    private volumeCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
     private ctxInfoEl: HTMLDivElement = null as any;
 
     public constructor() {
@@ -19,57 +24,65 @@ class Main {
         this.init();
     }
 
-    private gotStream(stream: MediaStream) {
+    private gotStream(stream: MediaStream, _this: this) {
         console.log("got stream success", stream);
 
-        const ctx = new AudioContext();
+        _this.audioCtx = new AudioContext();
 
-        // Create an AudioNode from the stream.
-        const streamNode = ctx.createMediaStreamSource(stream);
+        _this.debugCurrentAudioContext(_this.audioCtx);
 
-        const mediaStreamSource = ctx.createMediaStreamSource(
-            streamNode.mediaStream
-        );
+        // Create an AudioNode from the stream. in this case is the user microphone from getUserMedia callback
+        const streamNode = _this.audioCtx.createMediaStreamSource(stream);
+
+        const mediaStreamSource = _this.audioCtx.createMediaStreamSource(streamNode.mediaStream);
+        const gainNode = _this.audioCtx.createGain();
+
+        this.volumeCtrl.inputEl.addEventListener("input", (event) => {
+            this.volumeCtrl.inputEl.value = event.target!.value;
+            this.volumeCtrl.valueEl.textContent = event.target!.value;
+            gainNode.gain.value = Number(event.target!.value);
+        });
 
         // Connect it to the destination to hear yourself (or any other node for processing!)
-        mediaStreamSource.connect(ctx.destination);
+        // plug microphone input into the speaker output
+        const audioNode = mediaStreamSource.connect(gainNode);
+
+        gainNode.connect(_this.audioCtx.destination);
 
         console.log("source node after connect", mediaStreamSource);
+        console.log("audio node", audioNode);
     }
 
+    // basically allows microphone input into the browser after user allows access
     private getUserMedia(): void {
         window.navigator.getUserMedia(
             {
                 audio: true,
             },
-            this.gotStream,
+            (stream) => this.gotStream(stream, this),
             (err) => {
                 console.log("get user media error", err);
             }
         );
     }
 
-    private startContext(this: Main, event: MouseEvent): void {
-        console.log("event", event);
-        this.audioCtx = new AudioContext();
-
+    public debugCurrentAudioContext(ctx: AudioContext): void {
         const content: HTMLParagraphElement[] = [];
 
         let p = document.createElement("p");
-        p.textContent = "base latency: " + this.audioCtx.baseLatency.toString();
+        p.textContent = "base latency: " + ctx.baseLatency.toString();
         content.push(p);
 
         p = document.createElement("p");
-        p.textContent = "current time: " + this.audioCtx.currentTime.toString();
+        p.textContent = "current time: " + ctx.currentTime.toString();
         content.push(p);
 
         p = document.createElement("p");
-        p.textContent = "audio context state: " + this.audioCtx.state;
+        p.textContent = "audio context state: " + ctx.state;
         content.push(p);
 
         p = document.createElement("p");
-        p.textContent =
-            "audio context sample rate: " + this.audioCtx.sampleRate;
+        p.textContent = "audio context sample rate: " + ctx.sampleRate;
         content.push(p);
 
         console.log("content", content);
@@ -78,11 +91,17 @@ class Main {
         content.forEach((el) => {
             this.ctxInfoEl.appendChild(el);
         });
+    }
+
+    private startContext(this: Main, event: MouseEvent): void {
+        console.log("event", event);
+        this.audioCtx = new AudioContext();
+
+        this.debugCurrentAudioContext(this.audioCtx);
+
         this.getUserMedia();
     }
     private init(): void {
-        console.log("my ctx", this.audioCtx);
-
         const btn = document.createElement("button");
         btn.textContent = "start audio context";
         btn.addEventListener("click", (event) => {
@@ -92,7 +111,10 @@ class Main {
         this.ctxInfoEl = document.createElement("div");
         this.ctxInfoEl.textContent = "waiting to start audio context";
 
-        btn.click();
+        this.volumeCtrl.inputEl = document.querySelector("#volume") as HTMLInputElement;
+        this.volumeCtrl.valueEl = document.querySelector("#volume-ctrl-view") as HTMLSpanElement;
+
+        this.volumeCtrl.valueEl.textContent = "0.5";
 
         this.rootEl.appendChild(btn);
         this.rootEl.appendChild(this.ctxInfoEl);

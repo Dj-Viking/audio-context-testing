@@ -6,6 +6,9 @@ declare global {
             error?: (error: string) => void
         ): void;
     }
+    interface EventTarget {
+        value: string;
+    }
 }
 
 export {};
