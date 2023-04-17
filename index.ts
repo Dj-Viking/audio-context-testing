@@ -37,9 +37,9 @@ class Main {
         const mediaStreamSource = _this.audioCtx.createMediaStreamSource(streamNode.mediaStream);
         const gainNode = _this.audioCtx.createGain();
 
-        this.volumeCtrl.inputEl.addEventListener("input", (event) => {
-            this.volumeCtrl.inputEl.value = event.target!.value;
-            this.volumeCtrl.valueEl.textContent = event.target!.value;
+        _this.volumeCtrl.inputEl.addEventListener("input", (event) => {
+            _this.volumeCtrl.inputEl.value = event.target!.value;
+            _this.volumeCtrl.valueEl.textContent = event.target!.value;
             gainNode.gain.value = Number(event.target!.value);
         });
 
