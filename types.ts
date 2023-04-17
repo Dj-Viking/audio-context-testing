@@ -1,3 +1,15 @@
+/**
+ *
+ *
+ *  dictionary AudioWorkletNodeOptions : AudioNodeOptions {
+        unsigned long numberOfInputs = 1;
+        unsigned long numberOfOutputs = 1;
+        sequence<unsigned long> outputChannelCount;
+        record<DOMString, double> parameterData;
+        object processorOptions;
+    };
+ */
+
 declare global {
     interface Navigator {
         getUserMedia(
