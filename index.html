@@ -20,5 +20,13 @@
             <br />
         </div>
     </body>
-    <script src="./dist/index.js"></script>
+    <!-- <script>var exports = {}; var require = function(){};</script> -->
+    <script type="importmap">
+        {
+            "imports": {
+                "my-processor": "./my-processor.js"
+            }
+        }
+      </script>
+    <script type="module" src="./dist/index.js"></script>
 </html>

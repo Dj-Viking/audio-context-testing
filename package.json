@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "tsc; sh open.sh; tsc -w"
+        "start": "tsc; sh open.sh; tsc -w",
+        "start-windows": "powershell -NoProfile -ExecutionPolicy Bypass -File run.ps1"
     },
     "repository": {
         "type": "git",
@@ -19,6 +20,8 @@
     "homepage": "https://github.com/Dj-Viking/audio-context-testing#readme",
     "dependencies": {
         "@types/node": "^18.15.11",
+        "concurrently": "^8.0.1",
+        "live-server": "^1.2.2",
         "typescript": "^5.0.4"
     }
 }

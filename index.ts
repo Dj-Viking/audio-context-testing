@@ -13,8 +13,11 @@
 // process_microphone_buffer
 // show_some_data
 
+import { TestProcessor } from "./my-processor.js";
+
 class Main {
     private rootEl: HTMLDivElement;
+    private myAudioWorklet: AudioWorklet = null as any;
     private audioCtx: AudioContext = null as any;
     private volumeCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
     private ctxInfoEl: HTMLDivElement = null as any;
@@ -22,12 +25,17 @@ class Main {
     public constructor() {
         this.rootEl = document.querySelector("#root") as HTMLDivElement;
         this.init();
+        console.log("test processor", new TestProcessor({}));
     }
 
     private gotStream(stream: MediaStream, _this: this) {
         console.log("got stream success", stream);
 
         _this.audioCtx = new AudioContext();
+
+        // _this.myAudioWorklet = new AudioWorklet();
+
+        console.log("audio worklet", _this.myAudioWorklet);
 
         _this.debugCurrentAudioContext(_this.audioCtx);
 
