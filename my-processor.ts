@@ -2,6 +2,9 @@
 /**
  * @see https://webaudio.github.io/web-audio-api/#AudioWorkletNodeOptions
  * 
+ * audio worklet global scope example
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope
+ * 
  * dictionary AudioWorkletNodeOptions : AudioNodeOptions {
     unsigned long numberOfInputs = 1;
     unsigned long numberOfOutputs = 1;
