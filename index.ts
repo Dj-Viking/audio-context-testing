@@ -1,23 +1,17 @@
 /**
-        @see https://stackoverflow.com/questions/27846392/access-microphone-from-a-browser-javascript 
-        
-        audio worklet 
-        @see https://developer.mozilla.org/en-US/docs/Web/API/AudioWorklet
+    @see https://stackoverflow.com/questions/27846392/access-microphone-from-a-browser-javascript 
 
-        official web audio API docs
-        @see https://webaudio.github.io/web-audio-api
-     */
+    audio worklet 
+    @see https://developer.mozilla.org/en-US/docs/Web/API/AudioWorklet
 
-// TODO:
-// start_microphone
-// process_microphone_buffer
-// show_some_data
+    official web audio API docs
+    @see https://webaudio.github.io/web-audio-api
+*/
 
 import { MeterNode } from "./meterNode.js";
 
 class Main {
     private rootEl: HTMLDivElement;
-    // private myAudioWorklet: AudioWorklet = null as any;
     private audioCtx: AudioContext = null as any;
     private volumeCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
     private ctxInfoEl: HTMLDivElement = null as any;
@@ -28,10 +22,8 @@ class Main {
     }
 
     private async gotStream(stream: MediaStream, _this: this): Promise<void> {
-        // console.log("got stream success", stream);
 
         _this.audioCtx = new AudioContext();
-        let audioWorkletNode: AudioWorkletNode = null as any;
 
         _this.debugCurrentAudioContext(_this.audioCtx);
 
@@ -39,39 +31,37 @@ class Main {
         // defined in the script tag of index.html otherwise we get "user aborted" error message which doesn't describe what went wrong
         // we only get more descriptive messages if the promise is uncaught - caught errors do not yield anything helpful here
         await _this.audioCtx.audioWorklet.addModule("./dist/test-processor.js");
-        // audioWorkletNode = new AudioWorkletNode(_this.audioCtx, "meter");
 
+        // test the meter node with an oscillator
         // const oscillator = new OscillatorNode(_this.audioCtx);
         // const vuMeterNode = new MeterNode(_this.audioCtx, 25);
         // oscillator.connect(vuMeterNode);
         // oscillator.start();
 
+        // build audio graph
+
         // Create an AudioNode from the stream. in this case is the user microphone from getUserMedia callback
         const streamNode = _this.audioCtx.createMediaStreamSource(stream);
 
+        // create source node where the audio will be taken into
         const mediaStreamSource = _this.audioCtx.createMediaStreamSource(streamNode.mediaStream);
         
+        // create a meter processing node
+        const meterNode = new MeterNode(_this.audioCtx, 15);
+        const gainNode = _this.audioCtx.createGain();
+        // allow the input el to control the input gain of the microphone into the browser
         _this.volumeCtrl.inputEl.addEventListener("input", (event) => {
             _this.volumeCtrl.inputEl.value = event.target!.value;
             _this.volumeCtrl.valueEl.textContent = event.target!.value;
             gainNode.gain.value = Number(event.target!.value);
         });
-        // Connect it to the destination to hear yourself (or any other node for processing!)
-        // plug microphone input into the speaker output
-        // mediaStreamSource.connect(audioWorkletNode).connect(gainNode).connect(_this.audioCtx.destination);
-        const meterNode = new MeterNode(_this.audioCtx, 15);
-        const gainNode = _this.audioCtx.createGain();
-
-        mediaStreamSource.connect(gainNode);
-        // meterNode.connect(gainNode);
-
-        // gainNode.connect(_this.audioCtx.destination);
-        gainNode.connect(meterNode);
-        gainNode.connect(_this.audioCtx.destination);
         
-
-        console.log("source node after connect", mediaStreamSource);
-        // console.log("audio node", audioNode);
+        // Connect the stream to the destination to hear yourself (or any other node for processing!)
+        mediaStreamSource.connect(gainNode);
+        // connect gain node to meter node for worklet thread processing
+        gainNode.connect(meterNode);
+        // plug microphone input into the speaker output
+        gainNode.connect(_this.audioCtx.destination);
     }
 
     // basically allows microphone input into the browser after user allows access
