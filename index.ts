@@ -13,11 +13,11 @@
 // process_microphone_buffer
 // show_some_data
 
-import { TestProcessor } from "./my-processor.js";
+import { MeterNode } from "./meterNode.js";
 
 class Main {
     private rootEl: HTMLDivElement;
-    private myAudioWorklet: AudioWorklet = null as any;
+    // private myAudioWorklet: AudioWorklet = null as any;
     private audioCtx: AudioContext = null as any;
     private volumeCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
     private ctxInfoEl: HTMLDivElement = null as any;
@@ -25,40 +25,53 @@ class Main {
     public constructor() {
         this.rootEl = document.querySelector("#root") as HTMLDivElement;
         this.init();
-        console.log("test processor", new TestProcessor({}));
     }
 
-    private gotStream(stream: MediaStream, _this: this) {
-        console.log("got stream success", stream);
+    private async gotStream(stream: MediaStream, _this: this): Promise<void> {
+        // console.log("got stream success", stream);
 
         _this.audioCtx = new AudioContext();
-
-        // _this.myAudioWorklet = new AudioWorklet();
-
-        console.log("audio worklet", _this.myAudioWorklet);
+        let audioWorkletNode: AudioWorkletNode = null as any;
 
         _this.debugCurrentAudioContext(_this.audioCtx);
+
+        // have to provide dist in the path because I think the context of this index.js is within the scope of dist folder 
+        // defined in the script tag of index.html otherwise we get "user aborted" error message which doesn't describe what went wrong
+        // we only get more descriptive messages if the promise is uncaught - caught errors do not yield anything helpful here
+        await _this.audioCtx.audioWorklet.addModule("./dist/test-processor.js");
+        // audioWorkletNode = new AudioWorkletNode(_this.audioCtx, "meter");
+
+        // const oscillator = new OscillatorNode(_this.audioCtx);
+        // const vuMeterNode = new MeterNode(_this.audioCtx, 25);
+        // oscillator.connect(vuMeterNode);
+        // oscillator.start();
 
         // Create an AudioNode from the stream. in this case is the user microphone from getUserMedia callback
         const streamNode = _this.audioCtx.createMediaStreamSource(stream);
 
         const mediaStreamSource = _this.audioCtx.createMediaStreamSource(streamNode.mediaStream);
-        const gainNode = _this.audioCtx.createGain();
-
+        
         _this.volumeCtrl.inputEl.addEventListener("input", (event) => {
             _this.volumeCtrl.inputEl.value = event.target!.value;
             _this.volumeCtrl.valueEl.textContent = event.target!.value;
             gainNode.gain.value = Number(event.target!.value);
         });
-
         // Connect it to the destination to hear yourself (or any other node for processing!)
         // plug microphone input into the speaker output
-        const audioNode = mediaStreamSource.connect(gainNode);
+        // mediaStreamSource.connect(audioWorkletNode).connect(gainNode).connect(_this.audioCtx.destination);
+        const meterNode = new MeterNode(_this.audioCtx, 15);
+        const gainNode = _this.audioCtx.createGain();
 
+        mediaStreamSource.connect(gainNode);
+        // meterNode.connect(gainNode);
+
+        // gainNode.connect(_this.audioCtx.destination);
+        gainNode.connect(meterNode);
         gainNode.connect(_this.audioCtx.destination);
+        
 
         console.log("source node after connect", mediaStreamSource);
-        console.log("audio node", audioNode);
+        // console.log("audio node", audioNode);
     }
 
     // basically allows microphone input into the browser after user allows access
@@ -102,10 +115,10 @@ class Main {
     }
 
     private startContext(this: Main, event: MouseEvent): void {
-        console.log("event", event);
-        this.audioCtx = new AudioContext();
+        console.log("start context event", event);
+        // this.audioCtx = new AudioContext();
 
-        this.debugCurrentAudioContext(this.audioCtx);
+        // this.debugCurrentAudioContext(this.audioCtx);
 
         this.getUserMedia();
     }
