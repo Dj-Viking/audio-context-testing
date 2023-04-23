@@ -62,15 +62,15 @@ export class TestProcessor extends AudioWorkletProcessor implements IAudioWorkle
         outputs: Array<Float32Array>, 
         parameters: Record<string, unknown>
     ): boolean {
-        console.log("process", arguments);
+        // console.log("process", arguments);
         const input = inputs[0];
-        console.log('input', input);
+        // console.log('input', input);
         // Note that the input will be down-mixed to mono; however, if no inputs are
         // connected then zero channels will be passed in.
         if (input.length > 0) {
             // @ts-ignore
             const samples = input[0] as number[];
-            console.log('samples', samples);
+            // console.log('samples', samples);
             let sum = 0;
             let rms = 0;
             // Calculated the squared-sum.
@@ -89,7 +89,7 @@ export class TestProcessor extends AudioWorkletProcessor implements IAudioWorkle
         // Keep on processing if the volume is above a threshold, so that
         // disconnecting inputs does not immediately cause the meter to stop
         // computing its smoothed value.
-        console.log("process volume", this._volume, "min value", this.MINIMUM_VALUE);
+        // console.log("process volume", this._volume, "min value", this.MINIMUM_VALUE);
         return true;
         // if this returns false the processor dies and doesn't process anymore
         // the context will have to be reinstantiated
