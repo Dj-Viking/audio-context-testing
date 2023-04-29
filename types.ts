@@ -18,6 +18,10 @@ declare global {
             error?: (error: string) => void
         ): void;
     }
+    interface CSSStyleDeclaration {
+        y: number;
+        x: number;
+    }
     interface EventTarget {
         value: string;
     }

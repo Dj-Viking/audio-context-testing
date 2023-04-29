@@ -12,12 +12,16 @@ import { MeterNode } from "./meterNode.js";
 
 class Main {
     private rootEl: HTMLDivElement;
+    private meterSvg: SVGRectElement;
     private audioCtx: AudioContext = null as any;
     private volumeCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
     private ctxInfoEl: HTMLDivElement = null as any;
 
     public constructor() {
         this.rootEl = document.querySelector("#root") as HTMLDivElement;
+        this.meterSvg = document.querySelector("#meter-signal-rect") as SVGRectElement;
+        this.meterSvg.style.y = -232;
+        this.meterSvg.style.x = -76;
         this.init();
     }
 
@@ -47,7 +51,7 @@ class Main {
         const mediaStreamSource = _this.audioCtx.createMediaStreamSource(streamNode.mediaStream);
         
         // create a meter processing node
-        const meterNode = new MeterNode(_this.audioCtx, 15);
+        const meterNode = new MeterNode(_this.audioCtx, 15, this.meterSvg);
         const gainNode = _this.audioCtx.createGain();
         // allow the input el to control the input gain of the microphone into the browser
         _this.volumeCtrl.inputEl.addEventListener("input", (event) => {
