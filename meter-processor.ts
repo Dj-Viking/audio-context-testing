@@ -15,51 +15,50 @@
  */
 
 interface IAudioWorkletProcessor {
-    readonly port: globalThis.MessagePort
+    readonly port: globalThis.MessagePort;
     process(
-        inputs: Array<Float32Array>, 
-        outputs: Array<Float32Array>, 
-        parameters: Record<string, unknown>): boolean
+        inputs: Float32Array[][],
+        outputs: Float32Array[][],
+        parameters: Record<string, unknown>
+    ): boolean;
 }
 
 // processor for the meterNode class
 
 // test-processor.js
-// @ts-ignore
-export class TestProcessor extends AudioWorkletProcessor implements IAudioWorkletProcessor {
+// @ts-ignore AudioWorkletProcessor is not typescript type that exists
+// yet I suppose but if I don't extend it - a port is not defined for the class
+export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkletProcessor {
     // @ts-ignore this will be defined once instantiated by the audio worklet global scope thread
     private readonly port: globalThis.MessagePort;
     private readonly SMOOTHING_FACTOR = 0.9;
-    private readonly MINIMUM_VALUE = 0.0000001;
     private _volume: number;
     private _updateIntervalInMS: number;
     private _updateNextFrame: number;
-    // public port: MessagePort;
     constructor(options: AudioWorkletNodeOptions) {
         super(options);
         console.log("options from register in global audio worklet scope", options);
         console.log("number of inputs to audio worklet", options.numberOfInputs);
 
-        this._volume = 0.01
+        this._volume = 0.01;
         this._updateIntervalInMS = 0;
         this._updateNextFrame = this._updateIntervalInMS;
-        
-        // @ts-ignore
-        this.port.onmessage = event => {
+
+        // @ts-ignore port is assigned in the super() base constructor
+        this.port.onmessage = (event) => {
             if (event.data.updateIntervalInMS)
                 this._updateIntervalInMS = event.data.updateIntervalInMS;
-        }
-
+        };
     }
 
-    private get intervalInFrames () {
-        const sampleRate = 48000
-        return this._updateIntervalInMS / 1000 * sampleRate;
+    private get intervalInFrames() {
+        const sampleRate = 48000;
+        return (this._updateIntervalInMS / 1000) * sampleRate;
     }
     // public bool override
     process(
-        inputs: Array<Float32Array>, 
-        outputs: Array<Float32Array>, 
+        inputs: Float32Array[][],
+        outputs: Float32Array[][],
         parameters: Record<string, unknown>
     ): boolean {
         // console.log("process", arguments);
@@ -68,19 +67,22 @@ export class TestProcessor extends AudioWorkletProcessor implements IAudioWorkle
         // Note that the input will be down-mixed to mono; however, if no inputs are
         // connected then zero channels will be passed in.
         if (input.length > 0) {
-            // @ts-ignore
-            const samples = input[0] as number[];
-            // console.log('samples', samples);
+            const monoInputMixdown = input[0];
+            // console.log("monoInputMixdown", monoInputMixdown);
+
             let sum = 0;
             let rms = 0;
+
             // Calculated the squared-sum.
-            for (let i = 0; i < samples.length; ++i)
-                sum += samples[i] * samples[i];
+            for (let i = 0; i < monoInputMixdown.length; ++i)
+                sum += monoInputMixdown[i] * monoInputMixdown[i];
+
             // Calculate the RMS level and update the volume.
-            rms = Math.sqrt(sum / samples.length);
+            rms = Math.sqrt(sum / monoInputMixdown.length);
             this._volume = Math.max(rms, this._volume * this.SMOOTHING_FACTOR);
+
             // Update and sync the volume property with the main thread.
-            this._updateNextFrame -= samples.length;
+            this._updateNextFrame -= monoInputMixdown.length;
             if (this._updateNextFrame < 0) {
                 this._updateNextFrame += this.intervalInFrames;
                 this.port.postMessage({ volume: this._volume });
@@ -101,4 +103,4 @@ export class TestProcessor extends AudioWorkletProcessor implements IAudioWorkle
  * @see https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope/registerProcessor
  */
 // @ts-ignore
-registerProcessor("meter", TestProcessor);
+registerProcessor("meter", MeterProcessor);

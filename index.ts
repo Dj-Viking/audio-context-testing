@@ -26,15 +26,14 @@ class Main {
     }
 
     private async gotStream(stream: MediaStream, _this: this): Promise<void> {
-
         _this.audioCtx = new AudioContext();
 
         _this.debugCurrentAudioContext(_this.audioCtx);
 
-        // have to provide dist in the path because I think the context of this index.js is within the scope of dist folder 
+        // have to provide dist in the path because I think the context of this index.js is within the scope of dist folder
         // defined in the script tag of index.html otherwise we get "user aborted" error message which doesn't describe what went wrong
         // we only get more descriptive messages if the promise is uncaught - caught errors do not yield anything helpful here
-        await _this.audioCtx.audioWorklet.addModule("./dist/test-processor.js");
+        await _this.audioCtx.audioWorklet.addModule("./dist/meter-processor.js");
 
         // test the meter node with an oscillator
         // const oscillator = new OscillatorNode(_this.audioCtx);
@@ -49,7 +48,7 @@ class Main {
 
         // create source node where the audio will be taken into
         const mediaStreamSource = _this.audioCtx.createMediaStreamSource(streamNode.mediaStream);
-        
+
         // create a meter processing node
         const meterNode = new MeterNode(_this.audioCtx, 15, this.meterSvg);
         const gainNode = _this.audioCtx.createGain();
@@ -59,7 +58,7 @@ class Main {
             _this.volumeCtrl.valueEl.textContent = event.target!.value;
             gainNode.gain.value = Number(event.target!.value);
         });
-        
+
         // Connect the stream to the destination to hear yourself (or any other node for processing!)
         mediaStreamSource.connect(gainNode);
         // connect gain node to meter node for worklet thread processing
