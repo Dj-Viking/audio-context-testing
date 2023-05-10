@@ -27,7 +27,6 @@ export class MeterNode extends AudioWorkletNode {
                 this._volume = event.data.volume;
                 // update the meter svg according to the processed volume;
                 let newHeight = this._volume * 1000;
-                // @ts-ignore
                 const green = "#00E941";
                 const red = "#FF0000";
                 if (newHeight > 233) {
@@ -37,7 +36,6 @@ export class MeterNode extends AudioWorkletNode {
                     this._meterSvg.style.fill = green;
                 }
                 this._meterSvg.height.baseVal.value = newHeight;
-                // console.log("get message from processor for volume", this._volume);
             }
         };
         this.port.start();
