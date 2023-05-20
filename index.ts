@@ -15,47 +15,49 @@ class Main {
     private meterSvg: SVGRectElement;
     private audioCtx: AudioContext = null as any;
     private volumeCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
+    private volumeLevel: HTMLParagraphElement;
     private ctxInfoEl: HTMLDivElement = null as any;
 
     public constructor() {
         this.rootEl = document.querySelector("#root") as HTMLDivElement;
         this.meterSvg = document.querySelector("#meter-signal-rect") as SVGRectElement;
+        this.volumeLevel = document.querySelector("#volumeLevel") as HTMLParagraphElement;
         this.meterSvg.style.y = -232;
         this.meterSvg.style.x = -76;
         this.init();
     }
 
-    private async gotStream(stream: MediaStream, _this: this): Promise<void> {
-        _this.audioCtx = new AudioContext();
+    private async gotStream(stream: MediaStream): Promise<void> {
+        this.audioCtx = new AudioContext();
 
-        _this.debugCurrentAudioContext(_this.audioCtx);
+        this.debugCurrentAudioContext(this.audioCtx);
 
         // have to provide dist in the path because I think the context of this index.js is within the scope of dist folder
         // defined in the script tag of index.html otherwise we get "user aborted" error message which doesn't describe what went wrong
         // we only get more descriptive messages if the promise is uncaught - caught errors do not yield anything helpful here
-        await _this.audioCtx.audioWorklet.addModule("./dist/meter-processor.js");
+        await this.audioCtx.audioWorklet.addModule("./dist/meter-processor.js");
 
         // test the meter node with an oscillator
-        // const oscillator = new OscillatorNode(_this.audioCtx);
-        // const vuMeterNode = new MeterNode(_this.audioCtx, 25);
+        // const oscillator = new OscillatorNode(this.audioCtx);
+        // const vuMeterNode = new MeterNode(this.audioCtx, 25);
         // oscillator.connect(vuMeterNode);
         // oscillator.start();
 
         // build audio graph
 
         // Create an AudioNode from the stream. in this case is the user microphone from getUserMedia callback
-        const streamNode = _this.audioCtx.createMediaStreamSource(stream);
+        const streamNode = this.audioCtx.createMediaStreamSource(stream);
 
         // create source node where the audio will be taken into
-        const mediaStreamSource = _this.audioCtx.createMediaStreamSource(streamNode.mediaStream);
+        const mediaStreamSource = this.audioCtx.createMediaStreamSource(streamNode.mediaStream);
 
         // create a meter processing node
-        const meterNode = new MeterNode(_this.audioCtx, 15, this.meterSvg);
-        const gainNode = _this.audioCtx.createGain();
+        const meterNode = new MeterNode(this.audioCtx, 15, this.meterSvg, this.volumeLevel);
+        const gainNode = this.audioCtx.createGain();
         // allow the input el to control the input gain of the microphone into the browser
-        _this.volumeCtrl.inputEl.addEventListener("input", (event) => {
-            _this.volumeCtrl.inputEl.value = event.target!.value;
-            _this.volumeCtrl.valueEl.textContent = event.target!.value;
+        this.volumeCtrl.inputEl.addEventListener("input", (event) => {
+            this.volumeCtrl.inputEl.value = event.target!.value;
+            this.volumeCtrl.valueEl.textContent = event.target!.value;
             gainNode.gain.value = Number(event.target!.value);
         });
 
@@ -64,7 +66,7 @@ class Main {
         // connect gain node to meter node for worklet thread processing
         gainNode.connect(meterNode);
         // plug microphone input into the speaker output
-        gainNode.connect(_this.audioCtx.destination);
+        gainNode.connect(this.audioCtx.destination);
     }
 
     // basically allows microphone input into the browser after user allows access
@@ -73,7 +75,7 @@ class Main {
             {
                 audio: true,
             },
-            (stream) => this.gotStream(stream, this),
+            (stream) => this.gotStream(stream),
             (err) => {
                 console.log("get user media error", err);
             }

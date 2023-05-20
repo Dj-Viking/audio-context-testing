@@ -17,8 +17,8 @@
 interface IAudioWorkletProcessor {
     readonly port: globalThis.MessagePort;
     process(
-        inputs: Float32Array[][],
-        outputs: Float32Array[][],
+        inputs: Array<Array<Float32Array>>,
+        outputs: Array<Array<Float32Array>>,
         parameters: Record<string, unknown>
     ): boolean;
 }
@@ -29,13 +29,13 @@ interface IAudioWorkletProcessor {
 // @ts-ignore AudioWorkletProcessor is not typescript type that exists
 // yet I suppose but if I don't extend it - a port is not defined for the class
 export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkletProcessor {
-    // @ts-ignore this will be defined once instantiated by the audio worklet global scope thread
-    private readonly port: globalThis.MessagePort;
-    private readonly SMOOTHING_FACTOR = 0.9;
+    private readonly SMOOTHING_FACTOR = 0.98;
     private _volume: number;
     private _updateIntervalInMS: number;
     private _updateNextFrame: number;
-    constructor(options: AudioWorkletNodeOptions) {
+    // @ts-ignore this will be defined once instantiated by the audio worklet global scope thread
+    public readonly port: globalThis.MessagePort;
+    public constructor(options: AudioWorkletNodeOptions) {
         super(options);
         console.log("options from register in global audio worklet scope", options);
         console.log("number of inputs to audio worklet", options.numberOfInputs);
@@ -56,29 +56,33 @@ export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkl
         return (this._updateIntervalInMS / 1000) * sampleRate;
     }
     // public bool override
-    process(
+    public process(
         inputs: Float32Array[][],
         outputs: Float32Array[][],
         parameters: Record<string, unknown>
     ): boolean {
         // console.log("process", arguments);
         const input = inputs[0];
-        // console.log('input', input);
+        // console.log("input", input);
         // Note that the input will be down-mixed to mono; however, if no inputs are
         // connected then zero channels will be passed in.
         if (input.length > 0) {
             const monoInputMixdown = input[0];
-            // console.log("monoInputMixdown", monoInputMixdown);
+            // const monoInputBuffer = input[0].buffer;
+            // console.log("monoInputMixdown", monoInputMixdown.length);
+            // console.log("monoInputMixdown buffer", monoInputBuffer);
 
             let sum = 0;
             let rms = 0;
 
             // Calculated the squared-sum.
-            for (let i = 0; i < monoInputMixdown.length; ++i)
+            for (let i = 0; i < monoInputMixdown.length; ++i) {
                 sum += monoInputMixdown[i] * monoInputMixdown[i];
+            }
 
             // Calculate the RMS level and update the volume.
             rms = Math.sqrt(sum / monoInputMixdown.length);
+            // console.log("rms", rms);
             this._volume = Math.max(rms, this._volume * this.SMOOTHING_FACTOR);
 
             // Update and sync the volume property with the main thread.
