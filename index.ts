@@ -43,6 +43,35 @@ class Main {
         // oscillator.connect(vuMeterNode);
         // oscillator.start();
 
+        // apply constraints to the audio track
+
+        // first remove the track from usermedia, apply constraints, and then add the audio track back into the userMediaStream
+        // in addition to these constraints applied to the track at runtime
+
+        // there are experimental flags in chrome that actually try to prevent feedback
+        // @see https://support.google.com/chrome/thread/210106028/google-chrome-constantly-auto-adjusting-microphone-levels-solved?hl=en
+
+        // adjust the flags here @see chrome://flags/
+
+        // I SAY LET IT FEEDBACK!! WHO CARES??!
+        // I can handle my own audio signal chrome...thanks
+        const audioTrack = stream
+            .getAudioTracks()
+            .find((track) => track.label.includes("VoiceMeeter"))!;
+
+        stream.removeTrack(audioTrack);
+
+        await audioTrack.applyConstraints({
+            autoGainControl: false,
+            noiseSuppression: false,
+            echoCancellation: false,
+        });
+
+        console.log("audio track", audioTrack);
+        console.log("audio track constraints", audioTrack.getConstraints());
+
+        stream.addTrack(audioTrack);
+
         // build audio graph
 
         // Create an AudioNode from the stream. in this case is the user microphone from getUserMedia callback

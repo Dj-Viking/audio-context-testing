@@ -25,7 +25,7 @@ interface IAudioWorkletProcessor {
 
 // processor for the meterNode class
 
-// test-processor.js
+// meter-processor.js
 // @ts-ignore AudioWorkletProcessor is not typescript type that exists
 // yet I suppose but if I don't extend it - a port is not defined for the class
 export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkletProcessor {
@@ -79,6 +79,7 @@ export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkl
             for (let i = 0; i < monoInputMixdown.length; ++i) {
                 sum += monoInputMixdown[i] * monoInputMixdown[i];
             }
+            // console.log("what is sum here", sum);
 
             // Calculate the RMS level and update the volume.
             rms = Math.sqrt(sum / monoInputMixdown.length);
