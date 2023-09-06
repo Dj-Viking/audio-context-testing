@@ -1,14 +1,31 @@
-/**
- *
- *
- *  dictionary AudioWorkletNodeOptions : AudioNodeOptions {
-        unsigned long numberOfInputs = 1;
-        unsigned long numberOfOutputs = 1;
-        sequence<unsigned long> outputChannelCount;
-        record<DOMString, double> parameterData;
-        object processorOptions;
-    };
- */
+// WEBIDL for MediaStreamTrack interface
+// @see https://w3c.github.io/mediacapture-main/#dom-mediastream
+// [Exposed=Window]
+// interface MediaStream : EventTarget {
+//   constructor();
+//   constructor(MediaStream stream);
+//   constructor(sequence<MediaStreamTrack> tracks);
+//   readonly attribute DOMString id;
+//   sequence<MediaStreamTrack> getAudioTracks();
+//   sequence<MediaStreamTrack> getVideoTracks();
+//   sequence<MediaStreamTrack> getTracks();
+//   MediaStreamTrack? getTrackById(DOMString trackId);
+//   undefined addTrack(MediaStreamTrack track);
+//   undefined removeTrack(MediaStreamTrack track);
+//   MediaStream clone();
+//   readonly attribute boolean active;
+//   attribute EventHandler onaddtrack;
+//   attribute EventHandler onremovetrack;
+// };
+
+// dictionary AudioWorkletNodeOptions : AudioNodeOptions {
+//     unsigned long numberOfInputs = 1;
+//     unsigned long numberOfOutputs = 1;
+//     sequence<unsigned long> outputChannelCount;
+//     record<DOMString, double> parameterData;
+//     object processorOptions;
+// };
+export {};
 
 declare global {
     interface Navigator {
@@ -27,5 +44,3 @@ declare global {
         value: string;
     }
 }
-
-export {};
