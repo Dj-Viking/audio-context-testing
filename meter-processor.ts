@@ -14,11 +14,11 @@
 };
  */
 
-interface IAudioWorkletProcessor {
+export interface IAudioWorkletProcessor {
     readonly port: globalThis.MessagePort;
     process(
-        inputs: Array<Array<Float32Array>>,
-        outputs: Array<Array<Float32Array>>,
+        inputs: Float32Array[][],
+        outputs: Float32Array[][],
         parameters: Record<string, unknown>
     ): boolean;
 }
@@ -26,8 +26,6 @@ interface IAudioWorkletProcessor {
 // processor for the meterNode class
 
 // meter-processor.js
-// @ts-ignore AudioWorkletProcessor is not typescript type that exists
-// yet I suppose but if I don't extend it - a port is not defined for the class
 export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkletProcessor {
     private readonly SMOOTHING_FACTOR = 0.98;
     private _volume: number;
@@ -52,10 +50,11 @@ export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkl
     }
 
     private get intervalInFrames() {
+        // TODO: get framerate from the devices and/or audio context!!
         const sampleRate = 48000;
         return (this._updateIntervalInMS / 1000) * sampleRate;
     }
-    // public bool override
+    // private bool override
     public process(
         inputs: Float32Array[][],
         outputs: Float32Array[][],
@@ -103,9 +102,9 @@ export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkl
         // return this._volume >= this.MINIMUM_VALUE;
     }
 }
-// const registerProcessor = function (name: string, processor: unknown) {};
+
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletGlobalScope/registerProcessor
  */
-// @ts-ignore
+
 registerProcessor("meter", MeterProcessor);
