@@ -16,7 +16,8 @@ declare global {
             options: { video?: boolean; audio?: boolean },
             success: (stream: MediaStream) => void,
             error?: (error: string) => void
-        ): MediaStream;
+        ): void;
+        getUserMedia(options: { video?: boolean; audio?: boolean }): MediaStream;
     }
     interface CSSStyleDeclaration {
         y: number;
