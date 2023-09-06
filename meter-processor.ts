@@ -54,7 +54,7 @@ export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkl
         const sampleRate = 48000;
         return (this._updateIntervalInMS / 1000) * sampleRate;
     }
-    // private bool override
+    // public bool override
     public process(
         inputs: Float32Array[][],
         outputs: Float32Array[][],
