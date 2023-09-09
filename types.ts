@@ -52,7 +52,9 @@ declare global {
             success: (stream: MediaStream) => void,
             error?: (error: string) => void
         ): void;
-        getUserMedia(options: { video?: boolean; audio?: boolean }): MediaStream;
+    }
+    interface MediaDevices {
+        getUserMedia(constraints: MediaStreamConstraints): Promise<MediaStream>;
     }
     interface CSSStyleDeclaration {
         y: number;

@@ -23,11 +23,16 @@ export interface IAudioWorkletProcessor {
     ): boolean;
 }
 
+export interface MyMessage {
+    updateIntervalInMS: number;
+    smoothingInput: number;
+}
+
 // processor for the meterNode class
 
 // meter-processor.js
 export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkletProcessor {
-    private readonly SMOOTHING_FACTOR = 0.98;
+    private _smoothingFactor = 0.999;
     private _volume: number;
     private _updateIntervalInMS: number;
     private _updateNextFrame: number;
@@ -43,9 +48,13 @@ export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkl
         this._updateNextFrame = this._updateIntervalInMS;
 
         // @ts-ignore port is assigned in the super() base constructor
-        this.port.onmessage = (event) => {
-            if (event.data.updateIntervalInMS)
+        this.port.onmessage = (event: MessageEvent<Partial<MyMessage>>) => {
+            if (event.data.smoothingInput) {
+                this._smoothingFactor = event.data.smoothingInput;
+            }
+            if (event.data.updateIntervalInMS) {
                 this._updateIntervalInMS = event.data.updateIntervalInMS;
+            }
         };
     }
 
@@ -74,7 +83,8 @@ export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkl
             let sum = 0;
             let rms = 0;
 
-            // Calculated the squared-sum.
+            // Calculated the squared-sum from the samples from the input channel(s)
+            // for this buffer size of 512 bytes(samples?) (default)
             for (let i = 0; i < monoInputMixdown.length; ++i) {
                 sum += monoInputMixdown[i] * monoInputMixdown[i];
             }
@@ -83,7 +93,7 @@ export class MeterProcessor extends AudioWorkletProcessor implements IAudioWorkl
             // Calculate the RMS level and update the volume.
             rms = Math.sqrt(sum / monoInputMixdown.length);
             // console.log("rms", rms);
-            this._volume = Math.max(rms, this._volume * this.SMOOTHING_FACTOR);
+            this._volume = Math.max(rms, this._volume * this._smoothingFactor);
 
             // Update and sync the volume property with the main thread.
             this._updateNextFrame -= monoInputMixdown.length;

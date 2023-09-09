@@ -18,8 +18,20 @@
             <br />
             <br />
             <br />
+
+            <label for="smoothing">smoothing control</label>
+            <br />
+            <input name="smoothing" id="smoothing" type="range" min=".900" max=".999" step="0.001" value="0.5" />
+            <br />
+            <br />
+            <span>smoothing</span>
+            <span id="smoothing-ctrl-view">0.5</span>
+            <br />
+            <br />
+            <br />
         </div>
         <p id="volumeLevel">Volume Level: 0</p>
+        <p id="smoothingLevel">Smoothing Level: 0</p>
         <svg
             id="meter-svg"
             width="75"

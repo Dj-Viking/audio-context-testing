@@ -15,6 +15,7 @@ class Main {
     private meterSvg: SVGRectElement;
     private audioCtx: AudioContext = null as any;
     private volumeCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
+    private smoothingCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
     private volumeLevel: HTMLParagraphElement;
     private ctxInfoEl: HTMLDivElement = null as any;
 
@@ -53,11 +54,8 @@ class Main {
 
         // adjust the flags here @see chrome://flags/
 
-        // I SAY LET IT FEEDBACK!! WHO CARES??!
-        // I can handle my own audio signal chrome...thanks
-        const audioTrack = stream
-            .getAudioTracks()
-            .find((track) => track.label.includes("VoiceMeeter"))!;
+        // just grab the first track since chrome only has one input set as a "microphone input"
+        const audioTrack = stream.getAudioTracks()[0];
 
         stream.removeTrack(audioTrack);
 
@@ -82,12 +80,20 @@ class Main {
 
         // create a meter processing node
         const meterNode = new MeterNode(this.audioCtx, 15, this.meterSvg, this.volumeLevel);
+
         const gainNode = this.audioCtx.createGain();
         // allow the input el to control the input gain of the microphone into the browser
         this.volumeCtrl.inputEl.addEventListener("input", (event) => {
             this.volumeCtrl.inputEl.value = event.target!.value;
             this.volumeCtrl.valueEl.textContent = event.target!.value;
             gainNode.gain.value = Number(event.target!.value);
+        });
+
+        // adjust smoothing in the meterprocessor via the meternode message port
+        this.smoothingCtrl.inputEl.addEventListener("input", (e) => {
+            this.smoothingCtrl.inputEl.value = e.target!.value;
+            this.smoothingCtrl.valueEl.textContent = e.target!.value;
+            meterNode.smoothingFactor = Number(e.target!.value);
         });
 
         // Connect the stream to the destination to hear yourself (or any other node for processing!)
@@ -158,8 +164,13 @@ class Main {
 
         this.volumeCtrl.inputEl = document.querySelector("#volume") as HTMLInputElement;
         this.volumeCtrl.valueEl = document.querySelector("#volume-ctrl-view") as HTMLSpanElement;
-
         this.volumeCtrl.valueEl.textContent = "0.5";
+
+        this.smoothingCtrl.inputEl = document.querySelector("#smoothing") as HTMLInputElement;
+        this.smoothingCtrl.valueEl = document.querySelector(
+            "#smoothing-ctrl-view"
+        ) as HTMLSpanElement;
+        this.smoothingCtrl.valueEl.textContent = "0.5";
 
         this.rootEl.appendChild(btn);
         this.rootEl.appendChild(this.ctxInfoEl);
