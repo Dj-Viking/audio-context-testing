@@ -8,13 +8,18 @@ export class MeterNode extends AudioWorkletNode {
     private _updateIntervalInMS: number = 0;
     private _smoothingFactor: number = 0;
     private _meterSvg: SVGRectElement;
+    private _blueMeterSvg: SVGRectElement;
+    private _blueLevelP: HTMLParagraphElement;
     private _volume: number = 0;
+    private _blueVolume: number = 0;
 
     private _levelP: HTMLParagraphElement;
     public constructor(
         context: AudioContext,
         updateIntervalInMS: number,
         meterSvg: SVGRectElement,
+        blueMeterSvg: SVGRectElement,
+        blueLevelP: HTMLParagraphElement,
         levelP: HTMLParagraphElement
     ) {
         super(context, "meter", {
@@ -30,14 +35,20 @@ export class MeterNode extends AudioWorkletNode {
         this._updateIntervalInMS = updateIntervalInMS;
         this._volume = 0;
         this._meterSvg = meterSvg;
+        this._blueMeterSvg = blueMeterSvg;
+        this._blueLevelP = blueLevelP;
         this._levelP = levelP;
 
         // Handles updated values from AudioWorkletProcessor on every frame
         this.port.onmessage = (event) => {
             if (event.data.volume) {
                 this._volume = event.data.volume;
+
                 // update the meter svg according to the processed volume;
                 let newHeight = this._volume * 2000;
+
+                // check samples???
+
                 const green = "#00E941";
 
                 const red = "#FF0000";
