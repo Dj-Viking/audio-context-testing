@@ -31,25 +31,47 @@
             <br />
         </div>
         <p id="volumeLevel">Volume Level: 0</p>
+        <p id="blueLevel">Volume Level: 0</p>
         <p id="smoothingLevel">Smoothing Level: 0</p>
-        <svg
-            id="meter-svg"
-            width="75"
-            height="233"
-            viewBox="0 0 75 233"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <rect width="75" height="233" fill="#D9D9D9" />
-            <rect
-                style="transform: rotate(-180deg)"
-                id="meter-signal-rect"
-                y="116"
+        <div style="display: flex;flex-direction: row;">
+            <svg
+                id="meter-svg"
                 width="75"
-                height="117"
-                fill="#00E941"
-            />
-        </svg>
+                height="233"
+                viewBox="0 0 75 233"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <rect width="75" height="233" fill="#D9D9D9" />
+                <rect
+                    style="transform: rotate(-180deg)"
+                    id="meter-signal-rect"
+                    y="116"
+                    width="75"
+                    height="117"
+                    fill="#00E941"
+                />
+            </svg>
+            <svg
+                id="blue-meter-svg"
+                width="75"
+                height="233"
+                viewBox="0 0 75 233"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <rect width="75" height="233" fill="#D9D9D9" />
+                <rect
+                    style="transform: rotate(-180deg)"
+                    id="blue-meter-signal-rect"
+                    y="116"
+                    width="75"
+                    height="117"
+                    fill="#00E941"
+                />
+            </svg>
+
+        </div>
     </body>
     <script type="importmap">
         {

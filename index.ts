@@ -13,16 +13,20 @@ import { MeterNode } from "./meterNode.js";
 class Main {
     private rootEl: HTMLDivElement;
     private meterSvg: SVGRectElement;
+    private blueMeterSvg: SVGRectElement;
     private audioCtx: AudioContext = null as any;
     private volumeCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
     private smoothingCtrl: { inputEl: HTMLInputElement; valueEl: HTMLSpanElement } = {} as any;
     private volumeLevel: HTMLParagraphElement;
+    private blueLevel: HTMLParagraphElement;
     private ctxInfoEl: HTMLDivElement = null as any;
 
     public constructor() {
         this.rootEl = document.querySelector("#root") as HTMLDivElement;
         this.meterSvg = document.querySelector("#meter-signal-rect") as SVGRectElement;
+        this.blueMeterSvg = document.querySelector("#blue-meter-signal-rect") as SVGRectElement;
         this.volumeLevel = document.querySelector("#volumeLevel") as HTMLParagraphElement;
+        this.blueLevel = document.querySelector("#blueLevel") as HTMLParagraphElement;
         this.meterSvg.style.y = -232;
         this.meterSvg.style.x = -76;
         this.init();
@@ -72,14 +76,18 @@ class Main {
 
         // build audio graph
 
-        // Create an AudioNode from the stream. in this case is the user microphone from getUserMedia callback
-        const streamNode = this.audioCtx.createMediaStreamSource(stream);
-
         // create source node where the audio will be taken into
-        const mediaStreamSource = this.audioCtx.createMediaStreamSource(streamNode.mediaStream);
+        const mediaStreamSource = this.audioCtx.createMediaStreamSource(stream);
 
         // create a meter processing node
-        const meterNode = new MeterNode(this.audioCtx, 15, this.meterSvg, this.volumeLevel);
+        const meterNode = new MeterNode(
+            this.audioCtx,
+            15,
+            this.meterSvg,
+            this.blueMeterSvg,
+            this.blueLevel,
+            this.volumeLevel
+        );
 
         const gainNode = this.audioCtx.createGain();
         // allow the input el to control the input gain of the microphone into the browser
