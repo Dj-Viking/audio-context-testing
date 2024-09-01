@@ -57,8 +57,8 @@ declare global {
         getUserMedia(constraints: MediaStreamConstraints): Promise<MediaStream>;
     }
     interface CSSStyleDeclaration {
-        y: number;
-        x: number;
+        y: string;
+        x: string;
     }
     interface EventTarget {
         value: string;

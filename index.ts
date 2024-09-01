@@ -23,8 +23,8 @@ class Main {
         this.rootEl = document.querySelector("#root") as HTMLDivElement;
         this.meterSvg = document.querySelector("#meter-signal-rect") as SVGRectElement;
         this.volumeLevel = document.querySelector("#volumeLevel") as HTMLParagraphElement;
-        this.meterSvg.style.y = -232;
-        this.meterSvg.style.x = -76;
+        this.meterSvg.style.y = (-232).toString();
+        this.meterSvg.style.x = (-76).toString();
         this.init();
     }
 
@@ -159,8 +159,18 @@ class Main {
             this.startContext(event);
         });
 
+        const row = document.querySelector("#context-info-row")!;
+
+        const ctxInfoElContainer = document.createElement("div");
+        ctxInfoElContainer.style.display = "flex";
+        ctxInfoElContainer.style.flexDirection = "column";
+        ctxInfoElContainer.style.justifyContent = "center";
+        row.append(ctxInfoElContainer);
+
         this.ctxInfoEl = document.createElement("div");
+        this.ctxInfoEl.id = "ctxInfoEl";
         this.ctxInfoEl.textContent = "waiting to start audio context";
+        ctxInfoElContainer.append(this.ctxInfoEl);
 
         this.volumeCtrl.inputEl = document.querySelector("#volume") as HTMLInputElement;
         this.volumeCtrl.valueEl = document.querySelector("#volume-ctrl-view") as HTMLSpanElement;
@@ -172,8 +182,8 @@ class Main {
         ) as HTMLSpanElement;
         this.smoothingCtrl.valueEl.textContent = "0.5";
 
-        this.rootEl.appendChild(btn);
-        this.rootEl.appendChild(this.ctxInfoEl);
+        this.rootEl.append(
+            btn);
     }
     public run(): void {
         console.log("running main");
